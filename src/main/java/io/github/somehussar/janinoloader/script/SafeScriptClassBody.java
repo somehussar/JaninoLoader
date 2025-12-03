@@ -33,6 +33,7 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
     SafeScriptClassBody(Class<DesiredType> outputClazz, IDynamicCompiler compiler, String[] defaultImports, String rawScript, Function<Class<? extends DesiredType>, DesiredType> instanceDelegate, Class<?>[] interfaces) {
         this.clazz = outputClazz;
         this.compiler = compiler;
+        compiler.addReloadListener(this);
         this.defaultImports = defaultImports;
         this.instanceDelegate = instanceDelegate != null ? instanceDelegate : clazz -> {
             try {
