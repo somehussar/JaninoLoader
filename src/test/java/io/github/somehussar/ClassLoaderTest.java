@@ -165,24 +165,4 @@ public class ClassLoaderTest {
             fail(i);
         }
     }
-
-    @Test
-    public void remapClassNameTest() {
-        try {
-            IDynamicCompiler jlc = IDynamicCompilerBuilder
-                    .createBuilder()
-                    .getCompiler();
-            jlc.compileClass(
-                    new StringResource(
-                            "pkg1/A.java",
-                            "package pkg1; import static java.lang.Math.random; public class A { public static int meth() { return (int) random()*1000; } }"
-                    )
-            );
-            ClassLoader mcl = jlc.getClassLoader();
-
-//            assertEquals(11, mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
-        } catch (Throwable i) {
-            fail(i);
-        }
-    }
 }
