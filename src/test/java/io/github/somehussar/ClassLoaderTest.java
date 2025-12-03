@@ -1,7 +1,7 @@
 package io.github.somehussar;
 
 
-import io.github.somehussar.janinoloader.classloader.JaninoClassLoader;
+import io.github.somehussar.janinoloader.JaninoClassLoader;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.StringResource;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ public class ClassLoaderTest {
     public void compilationTest() {
         try {
             JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
-            jlc.addClass(
+            jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
                             "package pkg1; public class A { public static int meth() { return 11; } }"
@@ -35,7 +35,7 @@ public class ClassLoaderTest {
         try {
             ClassLoader parentClassLoader = this.getClass().getClassLoader();
             JaninoClassLoader jlc = new JaninoClassLoader(parentClassLoader);
-            jlc.addClass(
+            jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
                             "package pkg1; public class A { public static int meth() { return 11; } }"
@@ -63,7 +63,7 @@ public class ClassLoaderTest {
             ClassLoader parentClassLoader = this.getClass().getClassLoader();
             JaninoClassLoader.LoadClassCondition condition = (name) -> !name.contains("Math");
             JaninoClassLoader jlc = new JaninoClassLoader(parentClassLoader, condition);
-            jlc.addClass(
+            jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
                             "package pkg1; import java.lang.Math; public class A { public static double meth() { return Math.random(); } }"
@@ -85,16 +85,14 @@ public class ClassLoaderTest {
     public void circularDependencyTest() {
         try {
             JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
-            jlc.batchCompile(new StringResource[] {
-                    new StringResource(
-                            "pkg2/B.java",
-                            "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
-                    ),
+            jlc.compileClass(new StringResource(
+                    "pkg2/B.java",
+                    "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
+            ),
                     new StringResource(
                             "pkg1/A.java",
                             "package pkg1; public class A { public static int test = 77; public static int meth() { return pkg2.B.meth(); } }"
-                    ),
-            });
+                    ));
             ClassLoader mcl = jlc.getClassLoader();
 
             assertEquals(77, mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));

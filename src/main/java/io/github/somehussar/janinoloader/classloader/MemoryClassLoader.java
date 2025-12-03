@@ -1,6 +1,8 @@
 package io.github.somehussar.janinoloader.classloader;
 
 
+import io.github.somehussar.janinoloader.JaninoClassLoader;
+
 import java.util.Map;
 
 public class MemoryClassLoader extends FilteredClassLoader {

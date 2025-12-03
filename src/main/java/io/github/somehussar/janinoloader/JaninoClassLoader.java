@@ -1,6 +1,7 @@
-package io.github.somehussar.janinoloader.classloader;
+package io.github.somehussar.janinoloader;
 
 import io.github.somehussar.janinoloader.api.IClassReloadListener;
+import io.github.somehussar.janinoloader.classloader.MemoryClassLoader;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.MapResourceCreator;
 import org.codehaus.commons.compiler.util.resource.Resource;
@@ -15,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class JaninoClassLoader {
-    private Map<String, byte[]> classes = new HashMap<>();
+    private final Map<String, byte[]> classes = new HashMap<>();
     private final Set<IClassReloadListener> listenerSet = new HashSet<>();
 
     private final LoadClassCondition classFilter;
@@ -37,18 +38,13 @@ public class JaninoClassLoader {
         return secure;
     }
 
-    public void batchCompile(StringResource[] resources) throws CompileException, IOException {
+    public void compileClass(StringResource... resources) throws CompileException, IOException {
         if (compiler == null)
             resetClassloader();
         compiler.compile(resources);
 
     }
 
-    public void addClass(StringResource resource) throws CompileException, IOException {
-        if (compiler == null)
-            resetClassloader();
-        compiler.compile(new Resource[]{resource});
-    }
 
     public void removeClass(String... names) {
         for (String name : names) {
