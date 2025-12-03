@@ -16,25 +16,25 @@ dependencies {
     implementation("org.codehaus.janino:janino:3.1.12")
 }
 
-tasks.register<Test>("integrationTest") {
-    description = "Runs integration tests."
-    group = "verification"
-    shouldRunAfter(tasks.test)
-    useJUnitPlatform()
-}
+//tasks.register<Test>("integrationTest") {
+//    description = "Runs integration tests."
+//    group = "verification"
+//    shouldRunAfter(tasks.test)
+//    useJUnitPlatform()
+//}
 
 tasks.test {
     useJUnitPlatform {
-        includeTags("unit")
-        excludeTags("integration")
+//        includeTags("unit")
+//        excludeTags("integration")
     }
 }
-tasks.named<Test>("integrationTest") {
-    useJUnitPlatform {
-        includeTags("unit")
-        includeTags("integration")
-    }
-}
+//tasks.named<Test>("integrationTest") {
+//    useJUnitPlatform {
+//        includeTags("unit")
+//        includeTags("integration")
+//    }
+//}
 
 tasks.jar {
     from({
