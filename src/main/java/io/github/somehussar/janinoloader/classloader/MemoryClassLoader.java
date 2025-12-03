@@ -1,7 +1,7 @@
 package io.github.somehussar.janinoloader.classloader;
 
 
-import io.github.somehussar.janinoloader.JaninoClassLoader;
+import io.github.somehussar.janinoloader.JaninoCompiler;
 
 import java.util.Map;
 
@@ -11,7 +11,7 @@ public class MemoryClassLoader extends FilteredClassLoader {
     public MemoryClassLoader(ClassLoader parent, Map<String, byte[]> classes) {
         this(parent, null, classes);
     }
-    public MemoryClassLoader(ClassLoader parent, JaninoClassLoader.LoadClassCondition classFilter, Map<String,byte[]> classes) {
+    public MemoryClassLoader(ClassLoader parent, JaninoCompiler.LoadClassCondition classFilter, Map<String,byte[]> classes) {
         super(parent, classFilter);
         this.classes = classes;
     }

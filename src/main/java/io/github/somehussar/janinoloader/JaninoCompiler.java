@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class JaninoClassLoader {
+public class JaninoCompiler {
     private final Map<String, byte[]> classes = new HashMap<>();
     private final Set<IClassReloadListener> listenerSet = new HashSet<>();
 
@@ -24,11 +24,11 @@ public class JaninoClassLoader {
     private Compiler compiler;
     private ClassLoader secure;
 
-    public JaninoClassLoader(ClassLoader parent) {
+    public JaninoCompiler(ClassLoader parent) {
         this(parent, null);
     }
 
-    public JaninoClassLoader(ClassLoader parent, LoadClassCondition classFilter) {
+    public JaninoCompiler(ClassLoader parent, LoadClassCondition classFilter) {
         this.classFilter = classFilter;
         this.parent = parent;
     }

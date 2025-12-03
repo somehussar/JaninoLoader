@@ -1,7 +1,7 @@
 package io.github.somehussar;
 
 
-import io.github.somehussar.janinoloader.JaninoClassLoader;
+import io.github.somehussar.janinoloader.JaninoCompiler;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.StringResource;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ public class ClassLoaderTest {
     @Test
     public void compilationTest() {
         try {
-            JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
+            JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
             jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
@@ -36,7 +36,7 @@ public class ClassLoaderTest {
     public void classLoaderSeparation() {
         try {
             ClassLoader parentClassLoader = this.getClass().getClassLoader();
-            JaninoClassLoader jlc = new JaninoClassLoader(parentClassLoader);
+            JaninoCompiler jlc = new JaninoCompiler(parentClassLoader);
             jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
@@ -63,8 +63,8 @@ public class ClassLoaderTest {
     public void filterClassTest() {
         try {
             ClassLoader parentClassLoader = this.getClass().getClassLoader();
-            JaninoClassLoader.LoadClassCondition condition = (name) -> !name.contains("Math");
-            JaninoClassLoader jlc = new JaninoClassLoader(parentClassLoader, condition);
+            JaninoCompiler.LoadClassCondition condition = (name) -> !name.contains("Math");
+            JaninoCompiler jlc = new JaninoCompiler(parentClassLoader, condition);
             jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
@@ -86,7 +86,7 @@ public class ClassLoaderTest {
     @Test
     public void circularDependencyTest() {
         try {
-            JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
+            JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
             jlc.compileClass(new StringResource(
                             "pkg2/B.java",
                             "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
@@ -106,7 +106,7 @@ public class ClassLoaderTest {
     @Test
     public void removeTest() {
         try {
-            JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
+            JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
             jlc.compileClass(new StringResource(
                             "pkg2/B.java",
                             "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
@@ -135,7 +135,7 @@ public class ClassLoaderTest {
     @Test
     public void recompileTest() {
         try {
-            JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
+            JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
             jlc.compileClass(new StringResource(
                             "pkg2/B.java",
                             "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
