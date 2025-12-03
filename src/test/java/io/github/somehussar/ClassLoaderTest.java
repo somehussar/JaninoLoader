@@ -2,6 +2,7 @@ package io.github.somehussar;
 
 
 import io.github.somehussar.janinoloader.classloader.JaninoClassLoader;
+import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.StringResource;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
@@ -52,6 +53,29 @@ public class ClassLoaderTest {
             } catch (Throwable ignored) {
 
             }
+        } catch (Throwable i) {
+            fail(i);
+        }
+    }
+    @Test
+    public void filterClassTest() {
+        try {
+            ClassLoader parentClassLoader = this.getClass().getClassLoader();
+            JaninoClassLoader.LoadClassCondition condition = (name) -> !name.contains("Math");
+            JaninoClassLoader jlc = new JaninoClassLoader(parentClassLoader, condition);
+            jlc.addClass(
+                    new StringResource(
+                            "pkg1/A.java",
+                            "package pkg1; import java.lang.Math; public class A { public static double meth() { return Math.random(); } }"
+                    )
+            );
+            ClassLoader mcl = jlc.getManagedClassLoader();
+
+            mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null);
+            fail("Did not filter out class");
+
+        } catch (CompileException ignored){
+
         } catch (Throwable i) {
             fail(i);
         }
