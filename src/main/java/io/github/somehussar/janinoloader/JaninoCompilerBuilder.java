@@ -10,8 +10,6 @@ public class JaninoCompilerBuilder implements IDynamicCompilerBuilder {
 
     private ClassLoader parent = this.getClass().getClassLoader();
     private LoadClassCondition classFilter;
-    private String[] imports;
-    private String[] staticImports;
 
     @Override
     public IDynamicCompilerBuilder setParentClassLoader(ClassLoader classLoader) {
