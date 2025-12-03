@@ -2,6 +2,8 @@ package io.github.somehussar;
 
 import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import io.github.somehussar.janinoloader.api.IDynamicCompilerBuilder;
+import io.github.somehussar.janinoloader.api.script.IScriptBodyBuilder;
+import io.github.somehussar.janinoloader.api.script.IScriptClassBody;
 import io.github.somehussar.janinoloader.script.SafeScriptClassBody;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.StringResource;
@@ -18,13 +20,13 @@ public class ClassBodyTest {
     public void testCompile() {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
-        SafeScriptClassBody<Int_to_Int> classBody = new SafeScriptClassBody<>(Int_to_Int.class, jlc, null, "" +
-                "" +
-                "public int apply(int x) {" +
-                "   return x*x;" +
-                "}" +
-                "",
-                null);
+        IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
+                .setScript("" +
+                        "public int apply(int x) {" +
+                        "   return x*x;" +
+                        "}" +
+                        "").build();
+
         Int_to_Int test = null;
         try {
             classBody.attemptRecompile();
@@ -47,13 +49,14 @@ public class ClassBodyTest {
     public void importGlobalTest() {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
-        SafeScriptClassBody<Int_to_Int> classBody = new SafeScriptClassBody<>(Int_to_Int.class, jlc, null, "" +
-                "import io.github.somehussar.ClassBodyTest.ImportTestClass;" +
-                "public int apply(int x) {" +
-                "   return ImportTestClass.square(x);" +
-                "}" +
-                "",
-                null);
+        IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
+                .setScript("" +
+                        "import io.github.somehussar.ClassBodyTest.ImportTestClass;" +
+                        "public int apply(int x) {" +
+                        "   return ImportTestClass.square(x);" +
+                        "}" +
+                        "").build();
+
         Int_to_Int test = null;
         try {
             classBody.attemptRecompile();
@@ -70,13 +73,15 @@ public class ClassBodyTest {
     public void importGlobalDefaultTest() {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
-        SafeScriptClassBody<Int_to_Int> classBody = new SafeScriptClassBody<>(Int_to_Int.class, jlc, new String[]{"io.github.somehussar.ClassBodyTest.ImportTestClass"}, "" +
-                "" +
-                "public int apply(int x) {" +
-                "   return ImportTestClass.square(x);" +
-                "}" +
-                "",
-                null);
+        IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
+                .setDefaultImports("io.github.somehussar.ClassBodyTest.ImportTestClass")
+                .setScript("" +
+                        "" +
+                        "public int apply(int x) {" +
+                        "   return ImportTestClass.square(x);" +
+                        "}" +
+                        "").build();
+
         Int_to_Int test = null;
         try {
             classBody.attemptRecompile();
@@ -93,13 +98,14 @@ public class ClassBodyTest {
     public void importLocalTest() {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
-        SafeScriptClassBody<Int_to_Int> classBody = new SafeScriptClassBody<>(Int_to_Int.class, jlc, null, "" +
-                "import pkg1.TestClass;" +
-                "public int apply(int x) {" +
-                "   return TestClass.value * x;" +
-                "}" +
-                "",
-                null);
+        IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
+                .setScript("" +
+                        "import pkg1.TestClass;" +
+                        "public int apply(int x) {" +
+                        "   return TestClass.value * x;" +
+                        "}" +
+                        "").build();
+
         Int_to_Int test = null;
         try {
             jlc.compileClass(new StringResource(
@@ -124,13 +130,14 @@ public class ClassBodyTest {
     public void importLocalDefaultTest() {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
-        SafeScriptClassBody<Int_to_Int> classBody = new SafeScriptClassBody<>(Int_to_Int.class, jlc, new String[]{"pkg1.TestClass"}, "" +
-                "" +
-                "public int apply(int x) {" +
-                "   return TestClass.value * x;" +
-                "}" +
-                "",
-                null);
+        IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
+                                                .setDefaultImports("pkg1.TestClass")
+                                                .setScript("" +
+                                                        "public int apply(int x) {" +
+                                                        "   return TestClass.value * x;" +
+                                                        "}" +
+                                                        "").build();
+
         Int_to_Int test = null;
         try {
             jlc.compileClass(new StringResource(

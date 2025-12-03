@@ -30,8 +30,7 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
     private Class<DesiredType> clazz;
     private Map<String, byte[]> classBytes = new HashMap<>();
 
-
-    public SafeScriptClassBody(Class<DesiredType> outputClazz, IDynamicCompiler compiler, String[] defaultImports, String rawScript, Function<Class<? extends DesiredType>, DesiredType> instanceDelegate, Class<?>... interfaces) {
+    SafeScriptClassBody(Class<DesiredType> outputClazz, IDynamicCompiler compiler, String[] defaultImports, String rawScript, Function<Class<? extends DesiredType>, DesiredType> instanceDelegate, Class<?>[] interfaces) {
         this.clazz = outputClazz;
         this.compiler = compiler;
         this.defaultImports = defaultImports;
@@ -98,6 +97,6 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
         if (compiler != null) compiler.removeListener(this);
         compiler = null;
         internalClassLoader = null;
-
+        object = null;
     }
 }
