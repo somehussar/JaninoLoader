@@ -2,6 +2,7 @@ package io.github.somehussar;
 
 
 import io.github.somehussar.janinoloader.JaninoCompiler;
+import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.StringResource;
 import org.junit.jupiter.api.Test;
@@ -63,7 +64,7 @@ public class ClassLoaderTest {
     public void filterClassTest() {
         try {
             ClassLoader parentClassLoader = this.getClass().getClassLoader();
-            JaninoCompiler.LoadClassCondition condition = (name) -> !name.contains("Math");
+            IDynamicCompiler.LoadClassCondition condition = (name) -> !name.contains("Math");
             JaninoCompiler jlc = new JaninoCompiler(parentClassLoader, condition);
             jlc.compileClass(
                     new StringResource(
@@ -88,11 +89,11 @@ public class ClassLoaderTest {
         try {
             JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
             jlc.compileClass(new StringResource(
-                            "pkg2/B.java",
+                            "pkg2.B",
                             "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
                     ),
                     new StringResource(
-                            "pkg1/A.java",
+                            "pkg1.B",
                             "package pkg1; public class A { public static int test = 77; public static int meth() { return pkg2.B.meth(); } }"
                     ));
             ClassLoader mcl = jlc.getClassLoader();
@@ -108,11 +109,11 @@ public class ClassLoaderTest {
         try {
             JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
             jlc.compileClass(new StringResource(
-                            "pkg2/B.java",
+                            "pkg2.B",
                             "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
                     ),
                     new StringResource(
-                            "pkg1/A.java",
+                            "pkg1.A",
                             "package pkg1; public class A { public static int test = 77; public static int meth() { return pkg2.B.meth(); } }"
                     ));
             AtomicReference<ClassLoader> mcl = new AtomicReference<>(jlc.getClassLoader());

@@ -1,12 +1,12 @@
 package io.github.somehussar.janinoloader.classloader;
 
-import io.github.somehussar.janinoloader.JaninoCompiler;
+import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 
 public class FilteredClassLoader extends ClassLoader {
 
-    private final JaninoCompiler.LoadClassCondition classFilter;
+    private final IDynamicCompiler.LoadClassCondition classFilter;
 
-    public FilteredClassLoader(ClassLoader parent, JaninoCompiler.LoadClassCondition classFilter) {
+    public FilteredClassLoader(ClassLoader parent, IDynamicCompiler.LoadClassCondition classFilter) {
         super(parent);
         this.classFilter = classFilter;
     }
