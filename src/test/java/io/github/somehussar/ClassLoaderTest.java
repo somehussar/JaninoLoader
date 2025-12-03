@@ -88,11 +88,11 @@ public class ClassLoaderTest {
             jlc.batchCompile(new StringResource[] {
                     new StringResource(
                             "pkg2/B.java",
-                            "package pkg2; public class B { public static int meth() { return 77;            } }"
+                            "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
                     ),
                     new StringResource(
                             "pkg1/A.java",
-                            "package pkg1; public class A { public static int meth() { return pkg2.B.meth(); } }"
+                            "package pkg1; public class A { public static int test = 77; public static int meth() { return pkg2.B.meth(); } }"
                     ),
             });
             ClassLoader mcl = jlc.getClassLoader();
