@@ -1,25 +1,27 @@
 package io.github.somehussar.janinoloader.script;
 
 import io.github.somehussar.janinoloader.api.IDynamicCompiler;
-import io.github.somehussar.janinoloader.api.script.IScriptCompiler;
+import io.github.somehussar.janinoloader.api.script.IScriptClassBody;
 import io.github.somehussar.janinoloader.classloader.MemoryClassLoader;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.janino.ClassBodyEvaluator;
-import org.codehaus.janino.Scanner;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class SafeScriptCompiler<DesiredType> implements IScriptCompiler<DesiredType> {
+public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<DesiredType> {
     private String rawScript;
     private DesiredType object;
 
-    private boolean needToRecompile;
+    private boolean needToRecompile = true;
 
     private IDynamicCompiler compiler;
     private final String[] defaultImports;
+    private final Class<?>[] interfaces;
     private final Function<Class<? extends DesiredType>, DesiredType> instanceDelegate;
 
     private ClassLoader internalClassLoader;
@@ -29,12 +31,23 @@ public class SafeScriptCompiler<DesiredType> implements IScriptCompiler<DesiredT
     private Map<String, byte[]> classBytes = new HashMap<>();
 
 
-    public SafeScriptCompiler(Class<DesiredType> extendingClass, IDynamicCompiler compiler, String[] defaultImports, String rawScript, Function<Class<? extends DesiredType>, DesiredType> instanceDelegate) {
-        this.clazz = extendingClass;
+    public SafeScriptClassBody(Class<DesiredType> outputClazz, IDynamicCompiler compiler, String[] defaultImports, String rawScript, Function<Class<? extends DesiredType>, DesiredType> instanceDelegate, Class<?>... interfaces) {
+        this.clazz = outputClazz;
         this.compiler = compiler;
         this.defaultImports = defaultImports;
+        this.instanceDelegate = instanceDelegate != null ? instanceDelegate : clazz -> {
+            try {
+                return clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        };
+        if (clazz.isInterface()) {
+            interfaces = Arrays.copyOf(interfaces, interfaces.length+1);
+            interfaces[interfaces.length-1] = clazz;
+        }
+        this.interfaces = interfaces;
         this.rawScript = rawScript;
-        this.instanceDelegate = instanceDelegate;
     }
 
 
@@ -65,9 +78,12 @@ public class SafeScriptCompiler<DesiredType> implements IScriptCompiler<DesiredT
             ClassBodyEvaluator se = new ClassBodyEvaluator();
             internalClassLoader = new ClassLoader(compiler.getClassLoader()) {};
             se.setParentClassLoader(internalClassLoader);
-            se.setExtendedClass(clazz);
-            se.setDefaultImports(defaultImports);
-            se.cook(new Scanner(rawScript));
+            if (!clazz.isInterface()) {
+                se.setExtendedClass(clazz);
+            }
+            se.setImplementedInterfaces(interfaces);
+            if (defaultImports != null) se.setDefaultImports(defaultImports);
+            se.cook(new StringReader(rawScript));
             compiledClassName = se.getClazz().getCanonicalName();
             Class<? extends DesiredType> outputClazz = (Class<? extends DesiredType>) se.getClazz();
             object = instanceDelegate.apply(outputClazz);

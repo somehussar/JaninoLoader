@@ -30,6 +30,7 @@ public class JaninoCompiler implements IDynamicCompiler {
 
     @Override
     public ClassLoader getClassLoader() {
+        if (compiler == null) resetClassloader();
         return secure;
     }
 
