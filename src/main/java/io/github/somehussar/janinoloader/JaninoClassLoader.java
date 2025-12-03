@@ -4,7 +4,6 @@ import io.github.somehussar.janinoloader.api.IClassReloadListener;
 import io.github.somehussar.janinoloader.classloader.MemoryClassLoader;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.MapResourceCreator;
-import org.codehaus.commons.compiler.util.resource.Resource;
 import org.codehaus.commons.compiler.util.resource.StringResource;
 import org.codehaus.janino.ClassLoaderIClassLoader;
 import org.codehaus.janino.Compiler;
@@ -41,10 +40,18 @@ public class JaninoClassLoader {
     public void compileClass(StringResource... resources) throws CompileException, IOException {
         if (compiler == null)
             resetClassloader();
+
         compiler.compile(resources);
 
     }
 
+    public void recompileClass(StringResource... resources) throws CompileException, IOException {
+        for (StringResource resource : resources) {
+            removeClass(resource.getFileName().replaceFirst("\\.java$", ""));
+        }
+        resetClassloader();
+        compileClass(resources);
+    }
 
     public void removeClass(String... names) {
         for (String name : names) {

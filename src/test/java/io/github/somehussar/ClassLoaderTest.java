@@ -7,6 +7,8 @@ import org.codehaus.commons.compiler.util.resource.StringResource;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -86,9 +88,9 @@ public class ClassLoaderTest {
         try {
             JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
             jlc.compileClass(new StringResource(
-                    "pkg2/B.java",
-                    "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
-            ),
+                            "pkg2/B.java",
+                            "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
+                    ),
                     new StringResource(
                             "pkg1/A.java",
                             "package pkg1; public class A { public static int test = 77; public static int meth() { return pkg2.B.meth(); } }"
@@ -96,6 +98,34 @@ public class ClassLoaderTest {
             ClassLoader mcl = jlc.getClassLoader();
 
             assertEquals(77, mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
+        } catch (Throwable i) {
+            fail(i);
+        }
+    }
+
+    @Test
+    public void recompileTest() {
+        try {
+            JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
+            jlc.compileClass(new StringResource(
+                            "pkg2/B.java",
+                            "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
+                    ),
+                    new StringResource(
+                            "pkg1/A.java",
+                            "package pkg1; public class A { public static int test = 77; public static int meth() { return pkg2.B.meth(); } }"
+                    ));
+            AtomicReference<ClassLoader> mcl = new AtomicReference<>(jlc.getClassLoader());
+            jlc.addReloadListener((cl) -> {
+                mcl.set(cl); return false;});
+
+            assertEquals(77, mcl.get().loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
+
+            jlc.recompileClass(new StringResource(
+                    "pkg2/B.java",
+                    "package pkg2; import java.lang.Math; public class B { public static int meth() { return (int) Math.pow(2, 6);            } }"
+            ));
+            assertEquals((int) Math.pow(2, 6), mcl.get().loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
         } catch (Throwable i) {
             fail(i);
         }
