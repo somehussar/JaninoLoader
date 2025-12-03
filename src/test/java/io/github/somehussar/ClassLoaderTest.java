@@ -1,7 +1,9 @@
 package io.github.somehussar;
 
-import io.github.somehussar.janinoloader.JaninoCompiler;
+
 import io.github.somehussar.janinoloader.api.IDynamicCompiler;
+import io.github.somehussar.janinoloader.api.IDynamicCompilerBuilder;
+import io.github.somehussar.janinoloader.api.delegates.LoadClassCondition;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.StringResource;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,7 @@ public class ClassLoaderTest {
     @Test
     public void compilationTest() {
         try {
-            JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
+            IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
             jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
@@ -36,7 +38,10 @@ public class ClassLoaderTest {
     public void classLoaderSeparation() {
         try {
             ClassLoader parentClassLoader = this.getClass().getClassLoader();
-            JaninoCompiler jlc = new JaninoCompiler(parentClassLoader);
+            IDynamicCompiler jlc = IDynamicCompilerBuilder
+                                    .createBuilder()
+                                    .setParentClassLoader(parentClassLoader)
+                                    .getCompiler();
             jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
@@ -62,9 +67,10 @@ public class ClassLoaderTest {
     @Test
     public void filterClassTest() {
         try {
-            ClassLoader parentClassLoader = this.getClass().getClassLoader();
-            IDynamicCompiler.LoadClassCondition condition = (name) -> !name.contains("Math");
-            JaninoCompiler jlc = new JaninoCompiler(parentClassLoader, condition);
+            LoadClassCondition condition = (name) -> !name.contains("Math");
+            IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder()
+                                    .setClassFilter(condition)
+                                    .getCompiler();
             jlc.compileClass(
                     new StringResource(
                             "pkg1/A.java",
@@ -86,7 +92,7 @@ public class ClassLoaderTest {
     @Test
     public void circularDependencyTest() {
         try {
-            JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
+            IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
             jlc.compileClass(new StringResource(
                             "pkg2.B",
                             "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
@@ -106,7 +112,7 @@ public class ClassLoaderTest {
     @Test
     public void removeTest() {
         try {
-            JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
+            IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
             jlc.compileClass(new StringResource(
                             "pkg2.B",
                             "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
@@ -135,7 +141,7 @@ public class ClassLoaderTest {
     @Test
     public void recompileTest() {
         try {
-            JaninoCompiler jlc = new JaninoCompiler(this.getClass().getClassLoader());
+            IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
             jlc.compileClass(new StringResource(
                             "pkg2/B.java",
                             "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
@@ -152,9 +158,29 @@ public class ClassLoaderTest {
 
             jlc.recompileClass(new StringResource(
                     "pkg2/B.java",
-                    "package pkg2; import java.lang.Math; public class B { public static int meth() { return (int) Math.pow(2, 6);            } }"
+                    "package pkg2; public class B { public static int meth() { return (int) Math.pow(2, 6);            } }"
             ));
             assertEquals((int) Math.pow(2, 6), mcl.get().loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
+        } catch (Throwable i) {
+            fail(i);
+        }
+    }
+
+    @Test
+    public void remapClassNameTest() {
+        try {
+            IDynamicCompiler jlc = IDynamicCompilerBuilder
+                    .createBuilder()
+                    .getCompiler();
+            jlc.compileClass(
+                    new StringResource(
+                            "pkg1/A.java",
+                            "package pkg1; import static java.lang.Math.random; public class A { public static int meth() { return (int) random()*1000; } }"
+                    )
+            );
+            ClassLoader mcl = jlc.getClassLoader();
+
+//            assertEquals(11, mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
         } catch (Throwable i) {
             fail(i);
         }
