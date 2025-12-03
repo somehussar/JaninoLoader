@@ -1,6 +1,5 @@
 package io.github.somehussar;
 
-
 import io.github.somehussar.janinoloader.JaninoCompiler;
 import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import org.codehaus.commons.compiler.CompileException;
