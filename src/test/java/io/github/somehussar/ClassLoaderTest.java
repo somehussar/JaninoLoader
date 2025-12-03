@@ -22,7 +22,7 @@ public class ClassLoaderTest {
                             "package pkg1; public class A { public static int meth() { return 11; } }"
                     )
             );
-            ClassLoader mcl = jlc.getManagedClassLoader();
+            ClassLoader mcl = jlc.getClassLoader();
 
             assertEquals(11, mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
         } catch (Throwable i) {
@@ -41,7 +41,7 @@ public class ClassLoaderTest {
                             "package pkg1; public class A { public static int meth() { return 11; } }"
                     )
             );
-            ClassLoader mcl = jlc.getManagedClassLoader();
+            ClassLoader mcl = jlc.getClassLoader();
 
             assertEquals(11, mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
 
@@ -69,7 +69,7 @@ public class ClassLoaderTest {
                             "package pkg1; import java.lang.Math; public class A { public static double meth() { return Math.random(); } }"
                     )
             );
-            ClassLoader mcl = jlc.getManagedClassLoader();
+            ClassLoader mcl = jlc.getClassLoader();
 
             mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null);
             fail("Did not filter out class");
@@ -95,7 +95,7 @@ public class ClassLoaderTest {
                             "package pkg1; public class A { public static int meth() { return pkg2.B.meth(); } }"
                     ),
             });
-            ClassLoader mcl = jlc.getManagedClassLoader();
+            ClassLoader mcl = jlc.getClassLoader();
 
             assertEquals(77, mcl.loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
         } catch (Throwable i) {

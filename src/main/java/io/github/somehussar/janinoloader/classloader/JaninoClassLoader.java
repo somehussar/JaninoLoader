@@ -1,5 +1,6 @@
 package io.github.somehussar.janinoloader.classloader;
 
+import io.github.somehussar.janinoloader.api.IClassReloadListener;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.MapResourceCreator;
 import org.codehaus.commons.compiler.util.resource.Resource;
@@ -9,10 +10,13 @@ import org.codehaus.janino.Compiler;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class JaninoClassLoader {
     private Map<String, byte[]> classes = new HashMap<>();
+    private final Set<IClassReloadListener> listenerSet = new HashSet<>();
 
     private final LoadClassCondition classFilter;
     private final ClassLoader parent;
@@ -29,7 +33,7 @@ public class JaninoClassLoader {
         this.parent = parent;
     }
 
-    public ClassLoader getManagedClassLoader() {
+    public ClassLoader getClassLoader() {
         return secure;
     }
 
@@ -55,9 +59,24 @@ public class JaninoClassLoader {
         resetClassloader();
     }
 
+    public void addReloadListener(IClassReloadListener listener) {
+        listenerSet.add(listener);
+    }
+
+    public void removeListener(IClassReloadListener listener) {
+        listenerSet.remove(listener);
+    }
+
+    private void notifyListeners() {
+        listenerSet.removeIf( listener -> listener.handleClassLoaderReload(secure));
+    }
 
     protected void resetClassloader() {
+        boolean notify = secure != null;
         secure = new MemoryClassLoader(parent, classFilter, classes);
+
+        if (notify) notifyListeners();
+
         compiler = new Compiler();
         compiler.setIClassLoader(new ClassLoaderIClassLoader(secure));
         compiler.setClassFileCreator(new MapResourceCreator(classes));
