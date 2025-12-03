@@ -104,6 +104,35 @@ public class ClassLoaderTest {
     }
 
     @Test
+    public void removeTest() {
+        try {
+            JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
+            jlc.compileClass(new StringResource(
+                            "pkg2/B.java",
+                            "package pkg2; public class B { public static int meth() { return pkg1.A.test;            } }"
+                    ),
+                    new StringResource(
+                            "pkg1/A.java",
+                            "package pkg1; public class A { public static int test = 77; public static int meth() { return pkg2.B.meth(); } }"
+                    ));
+            AtomicReference<ClassLoader> mcl = new AtomicReference<>(jlc.getClassLoader());
+            jlc.addReloadListener((cl) -> {
+                mcl.set(cl); return false;});
+
+            assertEquals(77, mcl.get().loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null));
+
+            jlc.removeClass("pkg2.B");
+            try {
+                mcl.get().loadClass("pkg1.A").getDeclaredMethod("meth").invoke(null);
+            } catch (Throwable ignored) {
+
+            }
+        } catch (Throwable i) {
+            fail(i);
+        }
+    }
+
+    @Test
     public void recompileTest() {
         try {
             JaninoClassLoader jlc = new JaninoClassLoader(this.getClass().getClassLoader());
