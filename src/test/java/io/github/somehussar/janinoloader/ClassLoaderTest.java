@@ -1,4 +1,4 @@
-package io.github.somehussar;
+package io.github.somehussar.janinoloader;
 
 
 import io.github.somehussar.janinoloader.api.IDynamicCompiler;

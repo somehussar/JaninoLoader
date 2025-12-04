@@ -1,4 +1,4 @@
-package io.github.somehussar;
+package io.github.somehussar.janinoloader;
 
 import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import io.github.somehussar.janinoloader.api.IDynamicCompilerBuilder;
@@ -90,7 +90,7 @@ public class ScriptBodyTest {
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
                 .setScript(
-                        "import io.github.somehussar.ScriptBodyTest.ImportTestClass;" +
+                        "import io.github.somehussar.janinoloader.ScriptBodyTest.ImportTestClass;" +
                         "public int apply(int x) {" +
                         "   return ImportTestClass.square(x);" +
                         "}").build();
@@ -112,7 +112,7 @@ public class ScriptBodyTest {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
-                .setDefaultImports("io.github.somehussar.ScriptBodyTest.ImportTestClass")
+                .setDefaultImports("io.github.somehussar.janinoloader.ScriptBodyTest.ImportTestClass")
                 .setScript(
                         
                         "public int apply(int x) {" +
