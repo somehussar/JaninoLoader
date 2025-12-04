@@ -2,13 +2,11 @@ package io.github.somehussar.janinoloader.script;
 
 import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import io.github.somehussar.janinoloader.api.script.IScriptClassBody;
-import io.github.somehussar.janinoloader.classloader.MemoryClassLoader;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.reflect.ByteArrayClassLoader;
 import org.codehaus.janino.ClassBodyEvaluator;
 
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -94,8 +92,23 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
             needToRecompile = false;
         } else {
             internalClassLoader = new ByteArrayClassLoader(classBytes, compiler.getClassLoader());
+            Class<? extends DesiredType> outputClazz = (Class<? extends DesiredType>) internalClassLoader.loadClass(compiledClassName);
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                ObjectOutputStream out = new ObjectOutputStream(bos);
+                out.writeObject(object);
 
-            object = instanceDelegate.apply((Class<? extends DesiredType>) internalClassLoader.loadClass(compiledClassName));
+                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+                ReloadingObjectInputStream in = new ReloadingObjectInputStream(bis, internalClassLoader);
+                object = (DesiredType) in.readObject();
+            } catch (Throwable e) {
+                try {
+                    object = instanceDelegate.apply(outputClazz);
+                } catch (Throwable failedAgain) {
+                    needToRecompile = true;
+                    this.attemptRecompile();
+                }
+            }
         }
     }
 
