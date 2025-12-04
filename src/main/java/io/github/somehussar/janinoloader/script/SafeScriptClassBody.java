@@ -12,6 +12,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<DesiredType> {
+
+    public static final InstanceDelegate<?> DEFAULT_INSTANCE_DELEGATE = clazz -> {
+            try {
+                return clazz.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        };
+    public static final ReloadDelegate<?> DEFAULT_RELOAD_DELEGATE = ((oldInstance, newInstance, internalClassLoader) -> {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream out = new ObjectOutputStream(bos);
+            out.writeObject(oldInstance);
+
+            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+            ReloadingObjectInputStream in = new ReloadingObjectInputStream(bis, internalClassLoader);
+            return in.readObject();
+        } catch (Throwable i) {
+            return newInstance;
+        }
+
+    });
     private String rawScript;
     private DesiredType object;
 
@@ -21,25 +43,27 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
     private final String[] defaultImports;
     private final Class<?>[] interfaces;
     private final InstanceDelegate<DesiredType> instanceDelegate;
+    private final ReloadDelegate<DesiredType> reloadDelegate;
 
     private ClassLoader internalClassLoader;
     private String compiledClassName;
 
-    private Class<DesiredType> clazz;
+    private final Class<DesiredType> clazz;
     private Map<String, byte[]> classBytes = new HashMap<>();
 
-    SafeScriptClassBody(Class<DesiredType> outputClazz, IDynamicCompiler compiler, String[] defaultImports, String rawScript, InstanceDelegate<DesiredType> instanceDelegate, Class<?>[] interfaces) {
+    @SuppressWarnings("unchecked")
+    SafeScriptClassBody(Class<DesiredType> outputClazz, IDynamicCompiler compiler, String[] defaultImports,
+                        Class<?>[] interfaces, String rawScript,
+                        InstanceDelegate<DesiredType> instanceDelegate,
+                        ReloadDelegate<DesiredType> reloadDelegate) {
         this.clazz = outputClazz;
         this.compiler = compiler;
         compiler.addReloadListener(this);
         this.defaultImports = defaultImports;
-        this.instanceDelegate = instanceDelegate != null ? instanceDelegate : clazz -> {
-            try {
-                return clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        };
+
+        this.instanceDelegate = instanceDelegate != null ? instanceDelegate : (InstanceDelegate<DesiredType>) DEFAULT_INSTANCE_DELEGATE;
+        this.reloadDelegate = reloadDelegate != null ? reloadDelegate : (ReloadDelegate<DesiredType>) DEFAULT_RELOAD_DELEGATE;
+
         if (clazz.isInterface()) {
             interfaces = Arrays.copyOf(interfaces, interfaces.length+1);
             interfaces[interfaces.length-1] = clazz;
@@ -52,7 +76,7 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
     @Override
     public boolean handleClassLoaderReload(ClassLoader loader) {
         try {
-            attemptRecompile();
+            assertCompiled();
         } catch (Throwable ignored) {}
         return false;
     }
@@ -66,12 +90,12 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
     public void setScript(String script) throws CompileException, IOException, ClassNotFoundException {
         this.needToRecompile = true;
         this.rawScript = script;
-        attemptRecompile();
+        assertCompiled();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void attemptRecompile() throws CompileException, IOException, ClassNotFoundException {
+    public void assertCompiled() throws CompileException, IOException, ClassNotFoundException {
         if (needToRecompile) {
             ClassBodyEvaluator se = new ClassBodyEvaluator();
             se.setParentClassLoader(compiler.getClassLoader());
@@ -94,19 +118,14 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
             internalClassLoader = new ByteArrayClassLoader(classBytes, compiler.getClassLoader());
             Class<? extends DesiredType> outputClazz = (Class<? extends DesiredType>) internalClassLoader.loadClass(compiledClassName);
             try {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                ObjectOutputStream out = new ObjectOutputStream(bos);
-                out.writeObject(object);
-
-                ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-                ReloadingObjectInputStream in = new ReloadingObjectInputStream(bis, internalClassLoader);
-                object = (DesiredType) in.readObject();
+                DesiredType newObject = instanceDelegate.apply(outputClazz);
+                object = reloadDelegate.apply(object, newObject, internalClassLoader);
             } catch (Throwable e) {
                 try {
                     object = instanceDelegate.apply(outputClazz);
                 } catch (Throwable failedAgain) {
                     needToRecompile = true;
-                    this.attemptRecompile();
+                    this.assertCompiled();
                 }
             }
         }

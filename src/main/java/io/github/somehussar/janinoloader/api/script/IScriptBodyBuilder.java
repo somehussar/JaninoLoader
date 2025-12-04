@@ -15,4 +15,6 @@ public interface IScriptBodyBuilder<DesiredType> {
     IScriptBodyBuilder<DesiredType> setInstanceDelegate(IScriptClassBody.InstanceDelegate<DesiredType> delegate);
 
     IScriptClassBody<DesiredType> build();
+
+    IScriptBodyBuilder<DesiredType> setReloadDelegate(IScriptClassBody.ReloadDelegate<DesiredType> delegate);
 }

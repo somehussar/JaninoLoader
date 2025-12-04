@@ -8,11 +8,16 @@ import java.io.IOException;
 public interface IScriptClassBody<DesiredType> extends IClassReloadListener {
     DesiredType get();
     void setScript(String script) throws CompileException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException;
-    void attemptRecompile() throws CompileException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException;
+    void assertCompiled() throws CompileException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException;
     void prepareToUnload();
 
     @FunctionalInterface
     interface InstanceDelegate<R> {
         R apply(Class<? extends R> clazz);
+    }
+
+    @FunctionalInterface
+    interface ReloadDelegate<R> {
+        R apply(R oldInstance, R newInstance, ClassLoader classLoaderReference);
     }
 }

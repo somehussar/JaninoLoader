@@ -31,7 +31,7 @@ public class ScriptBodyTest {
 
         Int_to_Int test = null;
         try {
-            classBody.attemptRecompile();
+            classBody.assertCompiled();
             test = classBody.get();
         } catch (CompileException compileException) {
             fail(compileException);
@@ -54,7 +54,7 @@ public class ScriptBodyTest {
 
         Int_to_Int test = null;
         try {
-            classBody.attemptRecompile();
+            classBody.assertCompiled();
             test = classBody.get();
         } catch (CompileException compileException) {
             fail(compileException);
@@ -97,7 +97,7 @@ public class ScriptBodyTest {
 
         Int_to_Int test = null;
         try {
-            classBody.attemptRecompile();
+            classBody.assertCompiled();
             test = classBody.get();
         } catch (CompileException compileException) {
             fail(compileException);
@@ -121,7 +121,7 @@ public class ScriptBodyTest {
 
         Int_to_Int test = null;
         try {
-            classBody.attemptRecompile();
+            classBody.assertCompiled();
             test = classBody.get();
         } catch (CompileException compileException) {
             fail(compileException);
@@ -152,7 +152,7 @@ public class ScriptBodyTest {
                     "   public static int value = 3;" +
                     "}"
             ));
-            classBody.attemptRecompile();
+            classBody.assertCompiled();
             test = classBody.get();
         } catch (CompileException compileException) {
             fail(compileException);
@@ -184,7 +184,7 @@ public class ScriptBodyTest {
                     "   public static int value = 3;" +
                     "}"
             ));
-            classBody.attemptRecompile();
+            classBody.assertCompiled();
             test = classBody.get();
         } catch (CompileException compileException) {
             fail(compileException);
@@ -224,7 +224,7 @@ public class ScriptBodyTest {
                     "   public static int getValue() {return 10;} " +
                     "}"
             ));
-            classBody.attemptRecompile();
+            classBody.assertCompiled();
 
             classBody.get().count();
             classBody.get().count();

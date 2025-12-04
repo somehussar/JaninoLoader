@@ -11,7 +11,8 @@ public class SafeScriptClassBuilder<DesiredType> implements IScriptBodyBuilder<D
     private String[] importList = new String[0];
     private Class<?>[] implementedClasses = new Class[0];
     private String rawScript;
-    private SafeScriptClassBody.InstanceDelegate<DesiredType> delegate;
+    private SafeScriptClassBody.InstanceDelegate<DesiredType> instanceDelegate;
+    private IScriptClassBody.ReloadDelegate<DesiredType> reloadDelegate;
     public SafeScriptClassBuilder(Class<DesiredType> clazz, IDynamicCompiler compiler) {
         assert clazz != null;
         assert compiler != null;
@@ -42,12 +43,18 @@ public class SafeScriptClassBuilder<DesiredType> implements IScriptBodyBuilder<D
 
     @Override
     public IScriptBodyBuilder<DesiredType> setInstanceDelegate(IScriptClassBody.InstanceDelegate<DesiredType> delegate) {
-        this.delegate = delegate;
+        this.instanceDelegate = delegate;
         return this;
     }
 
     @Override
     public IScriptClassBody<DesiredType> build() {
-        return new SafeScriptClassBody<>(clazz, compiler, importList, rawScript, delegate, implementedClasses);
+        return new SafeScriptClassBody<>(clazz, compiler, importList, implementedClasses, rawScript, instanceDelegate, reloadDelegate);
+    }
+
+    @Override
+    public IScriptBodyBuilder<DesiredType> setReloadDelegate(IScriptClassBody.ReloadDelegate<DesiredType> delegate) {
+        this.reloadDelegate = reloadDelegate;
+        return this;
     }
 }
