@@ -1,7 +1,9 @@
 package io.github.somehussar.janinoloader.example;
 
 public abstract class AbstractNPCScript {
-    // Make it transient so serializable doesn't nip this.
+    // If using Serializable
+    // (for example, when wanting to preserve script-defined variable states)
+    // Mark these fields as transient so they don't get picked up.
     private transient Npc npc;
 
     public static AbstractNPCScript reloadHandler(AbstractNPCScript old, AbstractNPCScript newObj) {
