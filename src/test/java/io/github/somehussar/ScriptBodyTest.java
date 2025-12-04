@@ -194,26 +194,25 @@ public class ScriptBodyTest {
 
     }
 
-    public interface TestInterface {
-        int count();
-        int TestValue();
+    public abstract static class TestAbstractClass {
+        public abstract int count();
+        public abstract int TestValue();
     }
 
     @Test
     public void importReloadTest() {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
-        IScriptClassBody<TestInterface> classBody = IScriptBodyBuilder.getBuilder(TestInterface.class, jlc)
+        IScriptClassBody<TestAbstractClass> classBody = IScriptBodyBuilder.getBuilder(TestAbstractClass.class, jlc)
                 .setImplementedTypes(Serializable.class)
+                .setDefaultImports("pkg1.TestClass")
                 .setScript(
                         
-                        "import pkg1.TestClass;" +
-                        
-                        "public int TestValue() {" +
+                        "int TestValue() {" +
                         "   return TestClass.getValue();" +
                         "}" +
                         "int count = 0;" +
-                        "public int count() {" +
+                        "int count() {" +
                         "   return count++;" +
                         "}").build();
 
@@ -237,7 +236,7 @@ public class ScriptBodyTest {
                     "package pkg1;" +
                     
                     "public class TestClass {" +
-                    "   public static int chujCiWDupe = 11;" +
+                    "   public static int testValueForRecompile = 11;" +
                     "   public static int getValue() {return 5;}" +
                     "}"
             ));
