@@ -6,11 +6,11 @@ import io.github.somehussar.janinoloader.classloader.MemoryClassLoader;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.janino.ClassBodyEvaluator;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<DesiredType> {
     private String rawScript;
@@ -21,7 +21,7 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
     private IDynamicCompiler compiler;
     private final String[] defaultImports;
     private final Class<?>[] interfaces;
-    private final Function<Class<? extends DesiredType>, DesiredType> instanceDelegate;
+    private final InstanceDelegate<DesiredType> instanceDelegate;
 
     private ClassLoader internalClassLoader;
     private String compiledClassName;
@@ -29,7 +29,7 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
     private Class<DesiredType> clazz;
     private Map<String, byte[]> classBytes = new HashMap<>();
 
-    SafeScriptClassBody(Class<DesiredType> outputClazz, IDynamicCompiler compiler, String[] defaultImports, String rawScript, Function<Class<? extends DesiredType>, DesiredType> instanceDelegate, Class<?>[] interfaces) {
+    SafeScriptClassBody(Class<DesiredType> outputClazz, IDynamicCompiler compiler, String[] defaultImports, String rawScript, InstanceDelegate<DesiredType> instanceDelegate, Class<?>[] interfaces) {
         this.clazz = outputClazz;
         this.compiler = compiler;
         compiler.addReloadListener(this);

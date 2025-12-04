@@ -4,8 +4,6 @@ import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import io.github.somehussar.janinoloader.api.script.IScriptBodyBuilder;
 import io.github.somehussar.janinoloader.api.script.IScriptClassBody;
 
-import java.util.function.Function;
-
 public class SafeScriptClassBuilder<DesiredType> implements IScriptBodyBuilder<DesiredType> {
 
     private final Class<DesiredType> clazz;
@@ -13,7 +11,7 @@ public class SafeScriptClassBuilder<DesiredType> implements IScriptBodyBuilder<D
     private String[] importList = new String[0];
     private Class<?>[] implementedClasses = new Class[0];
     private String rawScript;
-    private Function<Class<? extends DesiredType>, DesiredType> delegate;
+    private SafeScriptClassBody.InstanceDelegate<DesiredType> delegate;
     public SafeScriptClassBuilder(Class<DesiredType> clazz, IDynamicCompiler compiler) {
         assert clazz != null;
         assert compiler != null;
@@ -43,7 +41,7 @@ public class SafeScriptClassBuilder<DesiredType> implements IScriptBodyBuilder<D
     }
 
     @Override
-    public IScriptBodyBuilder<DesiredType> setInstanceDelegate(Function<Class<? extends DesiredType>, DesiredType> delegate) {
+    public IScriptBodyBuilder<DesiredType> setInstanceDelegate(IScriptClassBody.InstanceDelegate<DesiredType> delegate) {
         this.delegate = delegate;
         return this;
     }

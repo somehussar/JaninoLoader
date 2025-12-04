@@ -1,9 +1,6 @@
 package io.github.somehussar.janinoloader.api;
 
 import io.github.somehussar.janinoloader.JaninoCompiler;
-import org.codehaus.commons.compiler.CompileException;
-
-import java.io.IOException;
 
 public interface IClassReloadListener {
     /**

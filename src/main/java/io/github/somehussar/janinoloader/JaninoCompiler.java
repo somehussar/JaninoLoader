@@ -1,7 +1,7 @@
 package io.github.somehussar.janinoloader;
 
-import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import io.github.somehussar.janinoloader.api.IClassReloadListener;
+import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import io.github.somehussar.janinoloader.api.delegates.LoadClassCondition;
 import io.github.somehussar.janinoloader.classloader.MemoryClassLoader;
 import org.codehaus.commons.compiler.CompileException;

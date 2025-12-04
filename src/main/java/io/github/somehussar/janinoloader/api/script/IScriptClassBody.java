@@ -10,4 +10,9 @@ public interface IScriptClassBody<DesiredType> extends IClassReloadListener {
     void setScript(String script) throws CompileException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException;
     void attemptRecompile() throws CompileException, IOException, ClassNotFoundException, InstantiationException, IllegalAccessException;
     void prepareToUnload();
+
+    @FunctionalInterface
+    interface InstanceDelegate<R> {
+        R apply(Class<? extends R> clazz);
+    }
 }
