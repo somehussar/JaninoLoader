@@ -23,6 +23,8 @@ public class JaninoCompiler implements IDynamicCompiler {
     private Compiler compiler;
     private ClassLoader secure;
 
+    private boolean notify = false;
+
     JaninoCompiler(ClassLoader parent, LoadClassCondition classFilter) {
         this.classFilter = classFilter;
         this.parent = parent;
@@ -40,7 +42,7 @@ public class JaninoCompiler implements IDynamicCompiler {
             resetClassloader();
 
         compiler.compile(resources);
-
+        if (notify) { notifyListeners(); notify = false; }
     }
 
     @Override
@@ -77,10 +79,8 @@ public class JaninoCompiler implements IDynamicCompiler {
     }
 
     protected void resetClassloader() {
-        boolean notify = secure != null;
+        notify = secure != null;
         secure = new MemoryClassLoader(parent, classFilter, classes);
-
-        if (notify) notifyListeners();
 
         compiler = new Compiler();
         compiler.setIClassLoader(new ClassLoaderIClassLoader(secure));

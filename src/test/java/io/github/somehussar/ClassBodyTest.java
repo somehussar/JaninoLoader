@@ -4,10 +4,12 @@ import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import io.github.somehussar.janinoloader.api.IDynamicCompilerBuilder;
 import io.github.somehussar.janinoloader.api.script.IScriptBodyBuilder;
 import io.github.somehussar.janinoloader.api.script.IScriptClassBody;
-import io.github.somehussar.janinoloader.script.SafeScriptClassBody;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.commons.compiler.util.resource.StringResource;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
+
+import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,6 +38,42 @@ public class ClassBodyTest {
         } catch (Throwable ignored) {}
         assertNotNull(test);
         assertEquals(25, test.apply(5));
+
+    }
+
+    @Test
+    public void reloadTest() {
+        IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
+
+        IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
+                .setScript("" +
+                        "public int apply(int x) {" +
+                        "   return x*x;" +
+                        "}" +
+                        "").build();
+
+        Int_to_Int test = null;
+        try {
+            classBody.attemptRecompile();
+            test = classBody.get();
+        } catch (CompileException compileException) {
+            fail(compileException);
+        } catch (Throwable ignored) {}
+        assertNotNull(test);
+        assertEquals(25, test.apply(5));
+
+        try {
+            classBody.setScript("" +
+                    "public int apply(int x) {" +
+                    "   return x*x*x;" +
+                    "}" +
+                    "");
+            test = classBody.get();
+        } catch (CompileException compileException) {
+            fail(compileException);
+        } catch (Throwable ignored) {}
+        assertNotNull(test);
+        assertEquals(125, test.apply(5));
 
     }
 
@@ -95,7 +133,7 @@ public class ClassBodyTest {
     }
 
     @Test
-    public void importLocalTest() {
+    public void importDynamicTest() {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
@@ -127,7 +165,7 @@ public class ClassBodyTest {
     }
 
     @Test
-    public void importLocalDefaultTest() {
+    public void importDynamic() {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
@@ -155,6 +193,69 @@ public class ClassBodyTest {
         } catch (Throwable ignored) {}
         assertNotNull(test);
         assertEquals(3*17, test.apply(17));
+
+    }
+
+    public interface TestInterface {
+        int count();
+        int TestValue();
+    }
+
+    @Test
+    public void importReloadTest() {
+        IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
+
+        IScriptClassBody<TestInterface> classBody = IScriptBodyBuilder.getBuilder(TestInterface.class, jlc)
+                .setImplementedTypes(Serializable.class)
+                .setScript("" +
+                        "" +
+                        "import pkg1.TestClass;" +
+                        "" +
+                        "public int TestValue() {" +
+                        "   return TestClass.getValue();" +
+                        "}" +
+                        "int count = 0;" +
+                        "public int count() {" +
+                        "   return count++;" +
+                        "}" +
+                        "").build();
+
+        try {
+            jlc.compileClass(new StringResource(
+                    "pkg1.TestClass", "" +
+                    "package pkg1;" +
+                    "public class TestClass {" +
+                    "   public static int getValue() {return 10;} " +
+                    "}"
+            ));
+            classBody.attemptRecompile();
+
+            classBody.get().count();
+            classBody.get().count();
+            int expected = 1 + classBody.get().count();
+            assertEquals(classBody.get().TestValue(),  jlc.getClassLoader().loadClass("pkg1.TestClass").getMethod("getValue").invoke(null));
+
+            jlc.recompileClass(new StringResource(
+                    "pkg1.TestClass", "" +
+                    "package pkg1;" +
+                    "" +
+                    "public class TestClass {" +
+                    "   public static int getValue() {return 5;}" +
+                    "}"
+            ));
+
+            classBody.attemptRecompile();
+
+            assertEquals(classBody.get().TestValue(),  jlc.getClassLoader().loadClass("pkg1.TestClass").getMethod("getValue").invoke(null));
+//            System.out.println("NEW TEST VALUE: " + classBody.get().TestValue());
+
+            assertEquals(expected, classBody.get().count());
+        } catch (AssertionFailedError error) {
+            throw error;
+        } catch(Throwable ignored) {
+            fail(ignored);
+//            fail("Failed to reload");
+        }
 
     }
 }

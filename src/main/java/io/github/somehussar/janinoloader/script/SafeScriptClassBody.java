@@ -6,8 +6,7 @@ import io.github.somehussar.janinoloader.classloader.MemoryClassLoader;
 import org.codehaus.commons.compiler.CompileException;
 import org.codehaus.janino.ClassBodyEvaluator;
 
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -85,11 +84,32 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
             if (defaultImports != null) se.setDefaultImports(defaultImports);
             se.cook(new StringReader(rawScript));
             compiledClassName = se.getClazz().getCanonicalName();
+            classBytes = se.getBytecodes();
             Class<? extends DesiredType> outputClazz = (Class<? extends DesiredType>) se.getClazz();
             object = instanceDelegate.apply(outputClazz);
+            needToRecompile = false;
         } else {
+            byte[] serialized = null;
+            if (object instanceof Serializable) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream out = new ObjectOutputStream(baos);
+                out.writeObject(object);
+                out.close();
+                serialized = baos.toByteArray();
+            }
+
             internalClassLoader = new MemoryClassLoader(compiler.getClassLoader(), null, classBytes);
-            object = instanceDelegate.apply((Class<? extends DesiredType>) internalClassLoader.loadClass(compiledClassName));
+//            if (serialized != null) {
+//                ByteArrayInputStream bais = new ByteArrayInputStream(serialized);
+//
+//                ObjectInputStream in = new ReloadingObjectInputStream(
+//                        bais,
+//                        internalClassLoader
+//                );
+//
+//                object = (DesiredType) in.readObject();
+//            } else
+                object = instanceDelegate.apply((Class<? extends DesiredType>) internalClassLoader.loadClass(compiledClassName));
         }
     }
 
