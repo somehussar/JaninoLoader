@@ -35,9 +35,8 @@ public interface IDynamicCompiler {
      */
     void removeClass(String... names);
 
-
     /**
-     * Allow given objects listen for when a new classloader is allocated. <br>
+     * Allow given objects to listen for when a new classloader is allocated. <br>
      * Will only happen after first compilation. <br
      * <br>
      * An example of when it will be called: 
