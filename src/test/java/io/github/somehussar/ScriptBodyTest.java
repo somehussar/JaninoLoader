@@ -13,7 +13,7 @@ import java.io.Serializable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ClassBodyTest {
+public class ScriptBodyTest {
     public interface Int_to_Int {
         int apply(int num);
     }
@@ -89,7 +89,7 @@ public class ClassBodyTest {
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
                 .setScript("" +
-                        "import io.github.somehussar.ClassBodyTest.ImportTestClass;" +
+                        "import io.github.somehussar.ScriptBodyTest.ImportTestClass;" +
                         "public int apply(int x) {" +
                         "   return ImportTestClass.square(x);" +
                         "}" +
@@ -112,7 +112,7 @@ public class ClassBodyTest {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
-                .setDefaultImports("io.github.somehussar.ClassBodyTest.ImportTestClass")
+                .setDefaultImports("io.github.somehussar.ScriptBodyTest.ImportTestClass")
                 .setScript("" +
                         "" +
                         "public int apply(int x) {" +
