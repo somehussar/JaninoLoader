@@ -4,6 +4,7 @@ import io.github.somehussar.janinoloader.api.IDynamicCompiler;
 import io.github.somehussar.janinoloader.api.script.IScriptClassBody;
 import io.github.somehussar.janinoloader.classloader.MemoryClassLoader;
 import org.codehaus.commons.compiler.CompileException;
+import org.codehaus.commons.compiler.util.reflect.ByteArrayClassLoader;
 import org.codehaus.janino.ClassBodyEvaluator;
 
 import java.io.IOException;
@@ -85,38 +86,15 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
 
             se.cook(new StringReader(rawScript));
             classBytes = se.getBytecodes();
-            internalClassLoader = new MemoryClassLoader(compiler.getClassLoader(), null, classBytes);
-
             Class<? extends DesiredType> outputClazz = (Class<? extends DesiredType>) se.getClazz();
+            internalClassLoader = outputClazz.getClassLoader();
             compiledClassName = outputClazz.getCanonicalName();
-//            byte[] bytes = classBytes.get(compiledClassName);
-//            System.out.println(compiledClassName + " bytes: ");
-//            int count = 0;
-//            for (int i = 0; i < bytes.length; i++) {
-//                if (count >= 14) {
-//                    count = 0;
-//                    System.out.print("\n");
-//                }
-//                count++;
-//                System.out.print(String.format("%02x ",bytes[i]));
-//            }
-//
-//            System.out.println("\n");
+
             object = instanceDelegate.apply(outputClazz);
             needToRecompile = false;
         } else {
-            System.out.println("test");
-            internalClassLoader = new MemoryClassLoader(compiler.getClassLoader(), null, classBytes);
-//            if (serialized != null) {
-//                ByteArrayInputStream bais = new ByteArrayInputStream(serialized);
-//
-//                ObjectInputStream in = new ReloadingObjectInputStream(
-//                        bais,
-//                        internalClassLoader
-//                );
-//
-//                object = (DesiredType) in.readObject();
-//            } else
+            internalClassLoader = new ByteArrayClassLoader(classBytes, compiler.getClassLoader());
+
             object = instanceDelegate.apply((Class<? extends DesiredType>) internalClassLoader.loadClass(compiledClassName));
         }
     }

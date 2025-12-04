@@ -239,6 +239,7 @@ public class ClassBodyTest {
                     "package pkg1;" +
                     "" +
                     "public class TestClass {" +
+                    "   public static int chujCiWDupe = 11;" +
                     "   public static int getValue() {return 5;}" +
                     "}"
             ));
