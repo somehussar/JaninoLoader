@@ -23,11 +23,11 @@ public class ScriptBodyTest {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
-                .setScript("" +
+                .setScript(
                         "public int apply(int x) {" +
                         "   return x*x;" +
-                        "}" +
-                        "").build();
+                        "}"
+                ).build();
 
         Int_to_Int test = null;
         try {
@@ -46,11 +46,11 @@ public class ScriptBodyTest {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
-                .setScript("" +
+                .setScript(
                         "public int apply(int x) {" +
                         "   return x*x;" +
-                        "}" +
-                        "").build();
+                        "}"
+                ).build();
 
         Int_to_Int test = null;
         try {
@@ -63,11 +63,11 @@ public class ScriptBodyTest {
         assertEquals(25, test.apply(5));
 
         try {
-            classBody.setScript("" +
+            classBody.setScript(
                     "public int apply(int x) {" +
                     "   return x*x*x;" +
-                    "}" +
-                    "");
+                    "}"
+            );
             test = classBody.get();
         } catch (CompileException compileException) {
             fail(compileException);
@@ -77,6 +77,7 @@ public class ScriptBodyTest {
 
     }
 
+    @SuppressWarnings("unused")
     public static class ImportTestClass {
         public static int square(int x) {
             return x*x;
@@ -88,12 +89,11 @@ public class ScriptBodyTest {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
-                .setScript("" +
+                .setScript(
                         "import io.github.somehussar.ScriptBodyTest.ImportTestClass;" +
                         "public int apply(int x) {" +
                         "   return ImportTestClass.square(x);" +
-                        "}" +
-                        "").build();
+                        "}").build();
 
         Int_to_Int test = null;
         try {
@@ -113,12 +113,11 @@ public class ScriptBodyTest {
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
                 .setDefaultImports("io.github.somehussar.ScriptBodyTest.ImportTestClass")
-                .setScript("" +
-                        "" +
+                .setScript(
+                        
                         "public int apply(int x) {" +
                         "   return ImportTestClass.square(x);" +
-                        "}" +
-                        "").build();
+                        "}").build();
 
         Int_to_Int test = null;
         try {
@@ -137,19 +136,18 @@ public class ScriptBodyTest {
         IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
-                .setScript("" +
+                .setScript(
                         "import pkg1.TestClass;" +
                         "public int apply(int x) {" +
                         "   return TestClass.value * x;" +
-                        "}" +
-                        "").build();
+                        "}").build();
 
         Int_to_Int test = null;
         try {
             jlc.compileClass(new StringResource(
-                    "pkg1.TestClass", "" +
+                    "pkg1.TestClass", 
                     "package pkg1;" +
-                    "" +
+                    
                     "public class TestClass {" +
                     "   public static int value = 3;" +
                     "}"
@@ -170,18 +168,18 @@ public class ScriptBodyTest {
 
         IScriptClassBody<Int_to_Int> classBody = IScriptBodyBuilder.getBuilder(Int_to_Int.class, jlc)
                                                 .setDefaultImports("pkg1.TestClass")
-                                                .setScript("" +
+                                                .setScript(
                                                         "public int apply(int x) {" +
                                                         "   return TestClass.value * x;" +
-                                                        "}" +
-                                                        "").build();
+                                                        "}"
+                                                ).build();
 
         Int_to_Int test = null;
         try {
             jlc.compileClass(new StringResource(
-                    "pkg1.TestClass", "" +
+                    "pkg1.TestClass", 
                     "package pkg1;" +
-                    "" +
+                    
                     "public class TestClass {" +
                     "   public static int value = 3;" +
                     "}"
@@ -207,22 +205,21 @@ public class ScriptBodyTest {
 
         IScriptClassBody<TestInterface> classBody = IScriptBodyBuilder.getBuilder(TestInterface.class, jlc)
                 .setImplementedTypes(Serializable.class)
-                .setScript("" +
-                        "" +
+                .setScript(
+                        
                         "import pkg1.TestClass;" +
-                        "" +
+                        
                         "public int TestValue() {" +
                         "   return TestClass.getValue();" +
                         "}" +
                         "int count = 0;" +
                         "public int count() {" +
                         "   return count++;" +
-                        "}" +
-                        "").build();
+                        "}").build();
 
         try {
             jlc.compileClass(new StringResource(
-                    "pkg1.TestClass", "" +
+                    "pkg1.TestClass", 
                     "package pkg1;" +
                     "public class TestClass {" +
                     "   public static int getValue() {return 10;} " +
@@ -236,9 +233,9 @@ public class ScriptBodyTest {
             assertEquals(classBody.get().TestValue(),  jlc.getClassLoader().loadClass("pkg1.TestClass").getMethod("getValue").invoke(null));
 
             jlc.recompileClass(new StringResource(
-                    "pkg1.TestClass", "" +
+                    "pkg1.TestClass", 
                     "package pkg1;" +
-                    "" +
+                    
                     "public class TestClass {" +
                     "   public static int chujCiWDupe = 11;" +
                     "   public static int getValue() {return 5;}" +
