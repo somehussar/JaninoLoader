@@ -33,16 +33,31 @@ public class ExampleTest {
                 }
             })
             // Define how to handle classloader hierarchy reload.
-            .setReloadDelegate((oldObj, newObj, classLoader) -> AbstractNPCScript.reloadHandler(oldObj, newObj)).build();
+            .setReloadDelegate(
+                    (oldObj, newObj, classLoader) -> AbstractNPCScript.reloadHandler(oldObj, newObj)
+            ).build();
 
             // Compile the object for the first time
             scripted.assertCompiled();
 
-            int health = scripted.get().getHealth();
+            // The compiled class doesn't actually modify the health value
+            // Expected to be the same as before.
+            int healthExpected = mark.getHealth();
             scripted.get().onDamaged(5);
-            assertEquals(health, scripted.get().getHealth());
+            assertEquals(healthExpected, scripted.get().getHealth());
+
+            // We're modifying the original NPC directly, not through script
+            // Script should return NPC's current health.
             mark.setHealth(5);
-            assertEquals(5, scripted.get().getHealth());
+            assertEquals(mark.getHealth(), scripted.get().getHealth());
+
+            // Simulating an updated script
+            // This time no methods are modified. onDamaged should remove health
+            scripted.setScript("");
+
+            healthExpected = mark.getHealth();
+            scripted.get().onDamaged(5);
+            assertEquals(healthExpected-5, mark.getHealth());
 
         } catch (Throwable e) {
             fail(e);
