@@ -75,29 +75,37 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
     public void attemptRecompile() throws CompileException, IOException, ClassNotFoundException {
         if (needToRecompile) {
             ClassBodyEvaluator se = new ClassBodyEvaluator();
-            internalClassLoader = new ClassLoader(compiler.getClassLoader()) {};
-            se.setParentClassLoader(internalClassLoader);
+            se.setParentClassLoader(compiler.getClassLoader());
             if (!clazz.isInterface()) {
                 se.setExtendedClass(clazz);
             }
+
             se.setImplementedInterfaces(interfaces);
             if (defaultImports != null) se.setDefaultImports(defaultImports);
+
             se.cook(new StringReader(rawScript));
-            compiledClassName = se.getClazz().getCanonicalName();
             classBytes = se.getBytecodes();
+            internalClassLoader = new MemoryClassLoader(compiler.getClassLoader(), null, classBytes);
+
             Class<? extends DesiredType> outputClazz = (Class<? extends DesiredType>) se.getClazz();
+            compiledClassName = outputClazz.getCanonicalName();
+//            byte[] bytes = classBytes.get(compiledClassName);
+//            System.out.println(compiledClassName + " bytes: ");
+//            int count = 0;
+//            for (int i = 0; i < bytes.length; i++) {
+//                if (count >= 14) {
+//                    count = 0;
+//                    System.out.print("\n");
+//                }
+//                count++;
+//                System.out.print(String.format("%02x ",bytes[i]));
+//            }
+//
+//            System.out.println("\n");
             object = instanceDelegate.apply(outputClazz);
             needToRecompile = false;
         } else {
-            byte[] serialized = null;
-            if (object instanceof Serializable) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream out = new ObjectOutputStream(baos);
-                out.writeObject(object);
-                out.close();
-                serialized = baos.toByteArray();
-            }
-
+            System.out.println("test");
             internalClassLoader = new MemoryClassLoader(compiler.getClassLoader(), null, classBytes);
 //            if (serialized != null) {
 //                ByteArrayInputStream bais = new ByteArrayInputStream(serialized);
@@ -109,7 +117,7 @@ public class SafeScriptClassBody<DesiredType> implements IScriptClassBody<Desire
 //
 //                object = (DesiredType) in.readObject();
 //            } else
-                object = instanceDelegate.apply((Class<? extends DesiredType>) internalClassLoader.loadClass(compiledClassName));
+            object = instanceDelegate.apply((Class<? extends DesiredType>) internalClassLoader.loadClass(compiledClassName));
         }
     }
 

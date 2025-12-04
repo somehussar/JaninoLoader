@@ -35,6 +35,28 @@ public class ClassLoaderTest {
     }
 
     @Test
+    public void secondCompile() {
+        try {
+            IDynamicCompiler jlc = IDynamicCompilerBuilder.createBuilder().getCompiler();
+            jlc.compileClass(
+                    new StringResource(
+                            "pkg1/A.java",
+                            "package pkg1; public class A { public static int meth() { return 11; } }"
+                    )
+            );
+            jlc.compileClass(new StringResource(
+                    "pkg2.B",
+                    "package pkg2; import pkg1.A; public class B { public static int meth() { return A.meth()*2; } }"
+            ));
+            ClassLoader mcl = jlc.getClassLoader();
+
+            assertEquals(11*2, mcl.loadClass("pkg2.B").getDeclaredMethod("meth").invoke(null));
+        } catch (Throwable i) {
+            fail(i);
+        }
+    }
+
+    @Test
     public void classLoaderSeparation() {
         try {
             ClassLoader parentClassLoader = this.getClass().getClassLoader();

@@ -23,14 +23,14 @@ public class SafeScriptClassBuilder<DesiredType> implements IScriptBodyBuilder<D
 
     @Override
     public IScriptBodyBuilder<DesiredType> setDefaultImports(String... imports) {
-        assert imports != null;
+        if (imports == null) imports = new String[0];
         this.importList = imports;
         return this;
     }
 
     @Override
     public IScriptBodyBuilder<DesiredType> setImplementedTypes(Class<?>... interfaces) {
-        assert interfaces != null;
+        if (interfaces == null) interfaces = new Class[0];
         this.implementedClasses = interfaces;
         return this;
     }
