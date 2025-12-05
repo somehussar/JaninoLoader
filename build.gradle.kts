@@ -26,6 +26,10 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+//    implementation("com.google.auto.service:auto-service:1.1.1")
+    annotationProcessor(project(":annotationProcessor"))
+    testAnnotationProcessor(project(":annotationProcessor"))
+    includedInJar(project(":annotationProcessor"))
 
     // Use the custom 'shadowed' configuration for shadow JAR dependencies
     includedInJar("org.codehaus.janino:janino:3.1.12")

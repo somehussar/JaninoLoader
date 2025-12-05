@@ -1,6 +1,9 @@
 package io.github.somehussar.janinoloader.example;
 
-public abstract class AbstractNPCScript {
+import io.github.somehussar.janinoloader.annotations.PermissableScriptHandler;
+
+@PermissableScriptHandler
+public class AbstractNPCScript {
     // If using Serializable
     // (for example, when wanting to preserve script-defined variable states)
     // Mark these fields as transient so they don't get picked up.
