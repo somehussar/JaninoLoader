@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.somehussar.janinoloader"
-version = "1.0.0-ALPHA"
+version = "1.0.1-ALPHA"
 
 repositories {
     mavenCentral()
