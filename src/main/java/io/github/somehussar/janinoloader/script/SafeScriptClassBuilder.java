@@ -54,7 +54,7 @@ public class SafeScriptClassBuilder<DesiredType> implements IScriptBodyBuilder<D
 
     @Override
     public IScriptBodyBuilder<DesiredType> setReloadDelegate(IScriptClassBody.ReloadDelegate<DesiredType> delegate) {
-        this.reloadDelegate = reloadDelegate;
+        this.reloadDelegate = delegate;
         return this;
     }
 }
