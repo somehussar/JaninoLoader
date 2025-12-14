@@ -5,6 +5,14 @@ plugins {
 group = "io.github.somehussar.janinoloader"
 version = "1.0.0-ALPHA"
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+
+
 repositories {
     mavenCentral()
 }
