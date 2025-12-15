@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("java")
     id("com.github.johnrengelman.shadow")
@@ -46,6 +48,7 @@ tasks.test {
 }
 
 tasks.shadowJar {
+
     archiveClassifier.set("")
     archiveBaseName.set("standalone-${project.name}") // Set the name of the JAR file
     archiveVersion.set("${project.version}") // Optional version
@@ -55,6 +58,20 @@ tasks.shadowJar {
     }
 
 }
+
+tasks.register<ShadowJar>("shadowSourcesJar") {
+    archiveClassifier.set("sources")
+    archiveBaseName.set("standalone-${project.name}") // Set the name of the JAR file
+    archiveVersion.set("${project.version}") // Optional version
+
+    from(sourceSets.main.get().allSource)
+
+    configurations = listOf(project.configurations.getByName("includedInJar"))
+
+    isZip64 = true
+}
+
 tasks.build {
+    dependsOn(tasks.named("shadowSourcesJar"))
     dependsOn(tasks.shadowJar)
 }
