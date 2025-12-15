@@ -1,5 +1,4 @@
 rootProject.name = "JaninoLoader"
-include("annotationProcessor")
 
 pluginManagement {
     repositories {
