@@ -28,10 +28,10 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 //    implementation("com.google.auto.service:auto-service:1.1.1")
 
-    // Use the custom 'shadowed' configuration for shadow JAR dependencies
-    includedInJar("org.codehaus.janino:janino:3.1.12")
-    includedInJar("org.codehaus.janino:commons-compiler:3.1.12")
-    includedInJar("org.codehaus.janino:commons-compiler-jdk:3.1.12")
+    // Use local snapshot build with generic return type fix (3.1.13-SNAPSHOT)
+    includedInJar(files("lib/janino-3.1.13-SNAPSHOT.jar"))
+    includedInJar(files("lib/commons-compiler-3.1.13-SNAPSHOT.jar"))
+    includedInJar(files("lib/commons-compiler-jdk-3.1.13-SNAPSHOT.jar"))
 }
 
 tasks.test {
