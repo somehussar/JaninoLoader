@@ -364,10 +364,8 @@ public class JaninoGenericsTest {
             Object result = clazz.getDeclaredMethod("test").invoke(null);
             assertEquals("hello", result);
         } catch (CompileException ce) {
-            System.err.println("[testGenericClassWithoutCast] COMPILE ERROR: " + ce.getMessage());
-            assertNotNull(ce.getMessage());
+            fail(ce);
         } catch (Throwable t) {
-            System.err.println("[testGenericClassWithoutCast] UNEXPECTED ERROR: " + t.getClass().getName() + ": " + t.getMessage());
             fail(t);
         }
     }
