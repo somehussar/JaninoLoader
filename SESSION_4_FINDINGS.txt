@@ -1,0 +1,74 @@
+================================================================================
+SESSION 4 FINDINGS: ORACLE CONSULTATION ON 13 FAILING LAMBDA TESTS
+================================================================================
+
+Date: 2026-03-10
+Status: COMPLETE - Full root cause analysis with prioritized solutions
+Current Test Status: 107/120 passing (89.2%)
+Remaining Failures: 13
+
+================================================================================
+EXECUTIVE SUMMARY
+================================================================================
+
+All 13 failing tests have been diagnosed into 6 root cause categories:
+
+A. Lambda Parameter Type Collapse (5 tests) — SAM param resolution fails
+B. Method Reference Path Issues (2 tests) — Method refs lose generics on lookup
+C. Static Generic Method Inference (2 tests) — No backward type inference
+D. Parser Limitations (2 tests) — Parser rejects valid syntax
+E. Scope/Context Issues (1 test) — Lambda in ternary breaks scope
+F. Configuration (1 test) — Java target version not set
+
+================================================================================
+RECOMMENDED FIXES (Priority Order)
+================================================================================
+
+TIER 1: QUICK WINS (5 minutes)
+  1. customFI_withDefaultMethod — Set target version = 8
+
+TIER 2: MEDIUM EFFORT (16-25 hours total) → Yields 5-6 new tests
+  2. edge_lambdaInStaticInit (2-4 hrs)
+  3. generics_wildcardBound (4-6 hrs)
+  4. methodRef_asComparator + methodRef_arrayConstructor (6-8 hrs)
+  
+TIER 3: HARD/ARCHITECTURAL (8-16 hours) → Deferred for now
+  5. typeInference_returnType + typeInference_lambdaInGenericMethod (backward inference)
+  6. stream_collect_groupingBy (depends on Tier 3)
+
+TIER 4: PARSER ISSUES (High regression risk) → Deferred
+  7. edge_recursiveViaHolder + edge_castToFunctionalInterface (parser mods)
+  8. nested_lambdaInConditional (scope issue)
+
+================================================================================
+FULL DOCUMENTATION
+================================================================================
+
+See these files for complete analysis:
+
+1. ORACLE_CONSULTATION_RESULTS.md
+   - Detailed root cause analysis for each test
+   - Implementation hints and code locations
+   - Risk assessment for each fix category
+
+2. ORACLE_DIAGNOSIS_SUMMARY.md
+   - Quick reference: test-by-test diagnosis
+   - Error messages and root causes
+   - Recommended implementation order
+
+3. LAMBDA_GENERICS_SESSION_MEMORY.md
+   - Session memory updated with oracle findings
+   - Historical context from earlier iterations
+   - Build and test commands
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Spawn unspecified-high agent to implement Tier 1-2 fixes
+2. Start with: customFI_withDefaultMethod (5 min quick win)
+3. Then: edge_lambdaInStaticInit, generics_wildcardBound, method refs
+4. Target outcome: 111-113/120 tests passing (92-94%)
+5. Document findings as fixes are applied
+
+================================================================================

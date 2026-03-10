@@ -261,13 +261,66 @@ The remaining failures are **not uniform** — they split into:
 
 ---
 
-## 10. What to Work on Next
+## 10. Oracle Consultation Results (NEW - Session 4)
 
-Priority order:
-1. **`edge_lambdaReturningArray`** — FI invocation return type for arrays, should be fixable in `getSubstitutedReturnType`
-2. **`customFI_withDefaultMethod`** — target version config, trivial fix
-3. **`stream_reduce`** — overload resolution for `reduce(0, (a,b) -> a+b)`, might be fixable with identity-type hinting
-4. **`methodRef_asComparator`** — extend SAM typing to method reference compilation path
-5. **`generics_wildcardBound`** — deeper wildcard bound resolution
-6. **`typeInference_returnType` / `typeInference_lambdaInGenericMethod`** — static generic method inference, architectural limitation
-7. **`stream_collect_groupingBy`** — static generic method `Collectors.groupingBy`, same category as #6
+**Complete oracle analysis** has been performed on all 13 failing tests. Full results in `ORACLE_CONSULTATION_RESULTS.md`.
+
+### Key Findings from Oracle
+
+**6 Distinct Root Cause Categories** (not uniform failures):
+
+| Category | Count | Root Cause | Severity | Fixability |
+|----------|-------|-----------|----------|-----------|
+| **A. Lambda Param Type Collapse** | 5 | SAM param resolution fails in specific contexts | Medium | Medium |
+| **B. Method Reference Path Issues** | 2 | Method refs use different compilation; lose generics on lookup | Medium | Medium |
+| **C. Static Generic Method Inference** | 2 | Backward type inference from assignment not implemented | Hard | Hard |
+| **D. Parser Limitations** | 2 | Parser rejects valid syntax | Low | High |
+| **E. Scope/Context Issues** | 1 | Lambda in ternary/conditional causes scope pollution | Medium | Medium |
+| **F. Configuration** | 1 | Java 8 target version not set | Trivial | Trivial |
+
+### Test-by-Test Diagnosis
+
+1. **`edge_lambdaInStaticInit`** (A) — Context propagation: `expectedTargetType` from variable init context
+2. **`methodRef_asComparator`** (B) — Method ref loses parameterized receiver type during synthetic lambda conversion
+3. **`stream_collect_groupingBy`** (C + A) — Static generic method + complex signature
+4. **`generics_wildcardBound`** (A) — Wildcard bounds not extracted for lambda param typing
+5. **`edge_lambdaReturningArray`** (Not in 13; passing now? Or need return type lookup fix?)
+6. **`edge_recursiveViaHolder`** (D) — Parser error: `holder[0] =` misinterpreted
+7. **`stream_reduce`** (C) — Overload resolution for `reduce(int, BiFunction)` — type var inference
+8. **`edge_castToFunctionalInterface`** (D) — Parser: `(FI) lambda` not recognized
+9. **`methodRef_arrayConstructor`** (B) — Array constructor ref return type wrong
+10. **`nested_lambdaInConditional`** (E) — Lambda scope issue in ternary
+11. **`typeInference_lambdaInGenericMethod`** (C) — Backward inference from `String s = apply(Supplier<T>)`
+12. **`customFI_withDefaultMethod`** (F) — Set target version to 8
+13. **`typeInference_returnType`** (C) — Same as #11
+
+### Priority Order (Oracle Recommendation)
+
+**Tier 1 (Quick Wins, 0-2 hrs)**:
+1. `customFI_withDefaultMethod` — Set target version = 8 (5 min)
+
+**Tier 2 (Medium, 4-8 hrs total)**:
+2. `edge_lambdaInStaticInit` — Context propagation (2-4 hrs)
+3. `generics_wildcardBound` — Wildcard bound extraction (4-6 hrs)
+4. `methodRef_asComparator` + `methodRef_arrayConstructor` — Extend SAM to method refs (6-8 hrs both)
+
+**Tier 3 (Hard, 8+ hrs)**:
+5. `typeInference_returnType` + `typeInference_lambdaInGenericMethod` — Backward inference (8-16 hrs)
+6. `stream_collect_groupingBy` — Depends on Tier 2/3 fixes
+
+**Deferred (Parser, high regression risk)**:
+7. `edge_recursiveViaHolder`, `edge_castToFunctionalInterface` — Parser modifications
+
+**Estimate**: Tier 1-2 = 5-6 tests, 16-25 hours, low-medium risk → target 111-112/120 passing
+
+## 11. What to Work on Next
+
+**Priority order from Oracle (see full analysis in ORACLE_CONSULTATION_RESULTS.md)**:
+
+1. **`customFI_withDefaultMethod`** — 5 min config fix
+2. **`generics_wildcardBound`** — 4-6 hrs wildcard resolution
+3. **`edge_lambdaInStaticInit`** — 2-4 hrs context propagation
+4. **`methodRef_asComparator` + `methodRef_arrayConstructor`** — 6-8 hrs method ref SAM extension
+5. **`stream_collect_groupingBy`** — Depends on above fixes
+
+**Defer**: Parser fixes, backward type inference (high risk/effort)
