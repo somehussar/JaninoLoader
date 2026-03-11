@@ -1721,12 +1721,8 @@ public class JaninoGenericsTest {
             Class<?> clazz = loader.loadClass("gen.ClassCastTest");
             Object result = clazz.getDeclaredMethod("test").invoke(null);
             assertEquals("safe_cast", result);
-        } catch (CompileException ce) {
-            System.err.println("[testClassCastMethod] COMPILE ERROR: " + ce.getMessage());
-            assertNotNull(ce.getMessage());
         } catch (Throwable t) {
-            System.err.println("[testClassCastMethod] UNEXPECTED: " + t.getClass().getName() + ": " + t.getMessage());
-            fail(t);
+            fail("Class.cast() should work with generic return type substitution: " + t.getMessage(), t);
         }
     }
 
@@ -1766,6 +1762,126 @@ public class JaninoGenericsTest {
             assertEquals("a=1", result);
         } catch (Throwable t) {
             fail(t);
+        }
+    }
+
+    // =================================================================
+    //  Regression Test: Diamond + no-cast on user-defined generic class
+    // =================================================================
+
+    /**
+     * Test 43: Box&lt;String&gt; box = new Box&lt;&gt;("FAAAH MAMBO"); String str = box.get();
+     * Tests diamond operator on user-defined generic class with no explicit cast.
+     * This is the regression case: the return type T of get() must resolve to String.
+     */
+    @Test
+    public void testDiamondOnUserDefinedGenericClassNoCast() {
+        try {
+            Map<String, byte[]> classes = new HashMap<>();
+            ClassLoader loader = createMemoryClassLoader(getClass().getClassLoader(), classes);
+
+            compile(classes, loader,
+                    new StringResource(
+                            "regr/Box.java",
+                            "package regr; " +
+                            "public class Box<T> { " +
+                            "    private T value; " +
+                            "    public Box(T value) { this.value = value; } " +
+                            "    public T get() { return value; } " +
+                            "}"
+                    ),
+                    new StringResource(
+                            "regr/BoxUser.java",
+                            "package regr; " +
+                            "public class BoxUser { " +
+                            "    public static String test() { " +
+                            "        Box<String> box = new Box<>(\"FAAAH MAMBO\"); " +
+                            "        String str = box.get(); " +
+                            "        return str; " +
+                            "    } " +
+                            "}"
+                    )
+            );
+
+            loader = createMemoryClassLoader(getClass().getClassLoader(), classes);
+            Class<?> clazz = loader.loadClass("regr.BoxUser");
+            Object result = clazz.getDeclaredMethod("test").invoke(null);
+            assertEquals("FAAAH MAMBO", result);
+        } catch (Throwable t) {
+            fail("Regression: diamond + no-cast on user-defined generic class should work: " + t.getMessage(), t);
+        }
+    }
+
+    @Test
+    public void testExplicitTypeArgOnUserDefinedGenericClassNoCast() {
+        try {
+            Map<String, byte[]> classes = new HashMap<>();
+            ClassLoader loader = createMemoryClassLoader(getClass().getClassLoader(), classes);
+
+            compile(classes, loader,
+                    new StringResource(
+                            "regr2/Box.java",
+                            "package regr2; " +
+                            "public class Box<T> { " +
+                            "    private T value; " +
+                            "    public Box(T value) { this.value = value; } " +
+                            "    public T get() { return value; } " +
+                            "}"
+                    ),
+                    new StringResource(
+                            "regr2/BoxUser.java",
+                            "package regr2; " +
+                            "public class BoxUser { " +
+                            "    public static String test() { " +
+                            "        Box<String> box = new Box<String>(\"hello\"); " +
+                            "        String s = box.get(); " +
+                            "        return s; " +
+                            "    } " +
+                            "}"
+                    )
+            );
+
+            loader = createMemoryClassLoader(getClass().getClassLoader(), classes);
+            Class<?> clazz = loader.loadClass("regr2.BoxUser");
+            Object result = clazz.getDeclaredMethod("test").invoke(null);
+            assertEquals("hello", result);
+        } catch (Throwable t) {
+            fail("Explicit type arg + no-cast on user-defined generic class should work: " + t.getMessage(), t);
+        }
+    }
+
+    @Test
+    public void testSignatureAttributeGenerated() {
+        try {
+            Map<String, byte[]> classes = new HashMap<>();
+            ClassLoader loader = createMemoryClassLoader(getClass().getClassLoader(), classes);
+
+            compile(classes, loader,
+                    new StringResource(
+                            "sigtest/Box.java",
+                            "package sigtest; " +
+                            "public class Box<T> { " +
+                            "    private T value; " +
+                            "    public Box(T value) { this.value = value; } " +
+                            "    public T get() { return value; } " +
+                            "}"
+                    )
+            );
+
+            loader = createMemoryClassLoader(getClass().getClassLoader(), classes);
+            Class<?> boxClass = loader.loadClass("sigtest.Box");
+
+            java.lang.reflect.TypeVariable<?>[] typeParams = boxClass.getTypeParameters();
+            assertTrue(typeParams.length > 0, "Box should have type parameters via Signature attribute");
+            assertEquals("T", typeParams[0].getName());
+
+            Method getMethod = boxClass.getDeclaredMethod("get");
+            java.lang.reflect.Type genericReturn = getMethod.getGenericReturnType();
+            assertTrue(genericReturn instanceof java.lang.reflect.TypeVariable,
+                    "get() should have generic return type T, got: " + genericReturn);
+            assertEquals("T", ((java.lang.reflect.TypeVariable<?>) genericReturn).getName());
+        } catch (Throwable t) {
+            fail("Signature attribute verification failed: " + t.getMessage(), t);
         }
     }
 }

@@ -83,6 +83,7 @@ public class JaninoCompiler implements IDynamicCompiler {
         secure = new MemoryClassLoader(parent, classFilter, classes);
 
         compiler = new Compiler();
+        compiler.setTargetVersion(8);
         compiler.setIClassLoader(new ClassLoaderIClassLoader(secure));
         compiler.setClassFileCreator(new MapResourceCreator(classes));
     }
