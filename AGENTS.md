@@ -6,7 +6,6 @@
 
 1. **Dynamic Script Execution**: Compile and execute arbitrary Java code at runtime as dynamically-generated script classes
 2. **Hot Class Reloading**: Compile, load, unload, and dynamically recompile Java classes without restarting the JVM
-3.  JANINO SOURCE CODE IS STORED AT `Z:\old desktop\projects\janino`
 
 ### Key Capabilities
 - **In-memory compilation**: Compile Java source to bytecode, store in memory
@@ -47,9 +46,8 @@ To build Janino JAR locally and copy to JaninoLoader:
 git clone https://github.com/janino-compiler/janino.git "Z:\old desktop\projects\janino"
 cd "Z:\old desktop\projects\janino"
 
-# 2. Build with Maven (requires Maven 3.9+, JDK 8+)
-mvn clean install -DskipTests -Dmaven.javadoc.skip=true \
-    -Dmaven.compiler.source=8 -Dmaven.compiler.target=8
+# 2. Build with GRADLE (JDK 8+)
+gradlew build -x test
 
 # 3. Copy main JAR to JaninoLoader /lib directory
 cp janino/target/janino-3.1.13-SNAPSHOT.jar \

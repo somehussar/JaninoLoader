@@ -43,6 +43,7 @@ public class JaninoLambdaTest {
     private static void compile(Map<String, byte[]> classes, ClassLoader loader, StringResource... sources)
             throws CompileException, IOException {
         Compiler compiler = new Compiler();
+        compiler.setTargetVersion(8);  // Enable Java 8 features (lambdas, default methods, etc.)
         compiler.setIClassLoader(new ClassLoaderIClassLoader(loader));
         compiler.setClassFileCreator(new MapResourceCreator(classes));
         compiler.compile(sources);

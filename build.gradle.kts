@@ -27,6 +27,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 //    implementation("com.google.auto.service:auto-service:1.1.1")
+    annotationProcessor(project(":annotationProcessor"))
+    testAnnotationProcessor(project(":annotationProcessor"))
+    includedInJar(project(":annotationProcessor"))
 
     // Use local snapshot build with generic return type fix (3.1.13-SNAPSHOT)
     includedInJar(files("lib/janino-3.1.13-SNAPSHOT.jar"))
