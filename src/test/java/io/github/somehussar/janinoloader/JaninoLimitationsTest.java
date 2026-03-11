@@ -265,6 +265,7 @@ public class JaninoLimitationsTest {
      * bound (Comparable&lt;T&gt;).
      * </p>
      */
+    @Disabled("Janino bug: IClass.parameterize() fails on <T extends Comparable<T>> bounded type parameters")
     @Test
     public void test_L2_boundedTypeParamLocalClass_scriptBody() {
         IDynamicCompiler compiler = newCompiler();
